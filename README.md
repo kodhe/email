@@ -1,14 +1,14 @@
 # Kodhe Email
 
-Package email hasil refaktor library `Email` CodeIgniter 3, dengan namespace `Kodhe\Framework\Email`. Mengirim email lewat protokol `mail()`, Sendmail, atau SMTP, dengan dukungan CC/BCC (termasuk mass BCC berbatas), lampiran, header MIME, mailtype text/html, word-wrap, dan debugger bawaan. Lapisan transport dimodularisasi (`MailTransport`, `SendmailTransport`, `SmtpTransport`) sehingga mudah di-extension atau di-mock saat testing.
+A refactored version of the CodeIgniter 3 `Email` library under the `Kodhe\Framework\Email` namespace. Sends email via the `mail()` protocol, Sendmail, or SMTP, with CC/BCC support (including batched mass BCC), attachments, MIME headers, text/html mailtype, word-wrapping, and a built-in debugger. The transport layer is modularized (`MailTransport`, `SendmailTransport`, `SmtpTransport`), making it easy to extend or mock during testing.
 
-## Instalasi
+## Installation
 
 ```bash
 composer require kodhe/email
 ```
 
-Persyaratan: PHP >= 8.1. Tidak ada dependensi eksternal wajib (SMTP memakai socket bawaan PHP).
+Requirements: PHP >= 8.1. No mandatory external dependencies (SMTP uses PHP's built-in sockets).
 
 ## Quick Start
 
@@ -25,16 +25,16 @@ $email = new Email();
 
 $email->from('admin@example.com', 'Admin')
       ->to('user@example.com')
-      ->subject('Halo')
-      ->message('Ini body email.')
+      ->subject('Hello')
+      ->message('This is the email body.')
       ->send();
 ```
 
-Fluent API mengembalikan `EmailInterface`, sehingga bisa dirantai seperti di atas. `send()` mengembalikan `bool`.
+The fluent API returns `EmailInterface`, so calls can be chained as above. `send()` returns a `bool`.
 
-## Konfigurasi
+## Configuration
 
-Lewat konstruktor atau `initialize()`:
+Via the constructor or `initialize()`:
 
 ```php
 $email = new Email([
@@ -48,41 +48,41 @@ $email = new Email([
     'charset'   => 'UTF-8',
     'wordwrap'  => true,
     'wrapchars' => 76,
-    'priority'  => 3,                 // 1 (paling tinggi) s.d. 6
+    'priority'  => 3,                 // 1 (highest) to 6
 ]);
 ```
 
-## Metode Utama
+## Main Methods
 
-| Metode | Keterangan |
+| Method | Description |
 |---|---|
-| `from(string $from, string $name = '')` | Alamat pengirim |
-| `replyTo(string $replyto, string $name = '')` | Alamat reply-to |
-| `to($to)` / `cc($cc)` | Penerima tunggal atau array |
-| `bcc($bcc, int $limit = 0)` | BCC; `$limit > 0` = mass BCC per kelompok |
-| `subject(string $subject)` / `message(string $body)` | Subjek dan body |
-| `attach(string $filename, string $disposition = '', ?string $newname = null, string $mime = '')` | Lampiran (bisa berulang) |
-| `send(bool $autoClear = true): bool` | Kirim; auto-clear setelah terkirim |
-| `clear(bool $clearAttachments = false)` | Reset state pesan |
-| `printDebugger(array $include = ['headers', 'subject', 'body']): string` | Debug tanpa benar-benar mengirim |
+| `from(string $from, string $name = '')` | Sender address |
+| `replyTo(string $replyto, string $name = '')` | Reply-to address |
+| `to($to)` / `cc($cc)` | Single recipient or array |
+| `bcc($bcc, int $limit = 0)` | BCC; `$limit > 0` = mass BCC in batches |
+| `subject(string $subject)` / `message(string $body)` | Subject and body |
+| `attach(string $filename, string $disposition = '', ?string $newname = null, string $mime = '')` | Attachment (can be called repeatedly) |
+| `send(bool $autoClear = true): bool` | Send; auto-clears after delivery |
+| `clear(bool $clearAttachments = false)` | Resets the message state |
+| `printDebugger(array $include = ['headers', 'subject', 'body']): string` | Debug output without actually sending |
 
-### Contoh HTML + lampiran
+### HTML + attachment example
 
 ```php
 $email = new Email(['protocol' => 'mail', 'mailtype' => 'html']);
 
 $email->from('admin@example.com')
       ->to(['a@example.com', 'b@example.com'])
-      ->subject('Laporan Mingguan')
-      ->message('<h1>Laporan</h1><p>Terlampir PDF.</p>')
-      ->attach('/path/to/laporan.pdf')
+      ->subject('Weekly Report')
+      ->message('<h1>Report</h1><p>PDF attached.</p>')
+      ->attach('/path/to/report.pdf')
       ->send();
 ```
 
-### Menekan pengiriman asli saat development
+### Suppressing real sends during development
 
 ```php
-// Jangan panggil send(); cukup lihat output header/body:
+// Don't call send(); just inspect the header/body output:
 echo $email->printDebugger();
 ```
 
@@ -90,7 +90,7 @@ echo $email->printDebugger();
 
 ```
 src/
-├── Email.php                     # Kelas utama (API kompatibel CI3)
+├── Email.php                     # Main class (CI3-compatible API)
 ├── Contracts/                    # EmailInterface, TransportInterface
 ├── Transports/                   # MailTransport, SendmailTransport, SmtpTransport
 ├── Message/                      # EmailMessage, Attachment, HeaderCollection
@@ -99,12 +99,12 @@ src/
 └── helpers/email.php             # valid_email(), send_email()
 ```
 
-## Catatan Migrasi dari Namespace Lama
+## Migration Notes from the Old Namespace
 
-Dokumentasi/test lama memakai `Kodhe\Library\Email\Email` serta metode bergaya CI3 lama (`reply_to()`, `set_mailtype()`, properti publik `word_wrap`). Pada versi Composer modern:
+Older documentation/tests used `Kodhe\Library\Email\Email` along with legacy CI3-style methods (`reply_to()`, `set_mailtype()`, the public `word_wrap` property). In modern Composer versions:
 
 ```php
 use Kodhe\Framework\Email\Email;
 ```
 
-Konfigurasi dilakukan lewat array (lihat bagian Konfigurasi), dan penamaan metode memakai camelCase (`replyTo()`). PSR-4 mapping `Kodhe\Framework\Email\` → `email/src/` dideklarasikan di `email/composer.json`.
+Configuration is done via an array (see the Configuration section), and method names use camelCase (`replyTo()`). The PSR-4 mapping `Kodhe\Framework\Email\` → `email/src/` is declared in `email/composer.json`.
